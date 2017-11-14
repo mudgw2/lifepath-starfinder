@@ -1,0 +1,28 @@
+{
+    "caretakers_origin": [{
+			"Original Parents": "your natural parents",
+			"weight":3
+			},{
+			"Close Family": "your uncle",
+			"weight":2
+			},{
+			"Close Family": "your aunt",
+			"weight":2
+			},{
+			"Close Family": "your grandfather",
+			"weight":2
+			},{
+			"Adopted": "a couple not related to you and you never knew your natural parents",
+			"weight":3
+			},{
+			"Institution": "an institution, be it an orphanage, monastery or other",
+			"weight":1
+			},{
+			"Master": "as property and your parents and sold you at an early age",
+			"weight":1
+			},{
+			"Alone": "noone",
+			"weight":1
+			}
+	]
+}

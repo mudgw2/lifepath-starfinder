@@ -1,0 +1,24 @@
+{
+    "hair": [{
+			"long": "have hair past the shoulders, as long as you'd like"
+			},{
+			"short": "have hair cropped close to your skull, or down to the shoulder, or anywhere in between"
+			},{
+			"bowl": "have a bowl cut common among monks and soldiers"
+			},{
+			"thin braid": "have a skinny braid of hair from short rat tail to long and luxurious"
+			},{
+			"thick braid": "have an elaborate, thick braid that takes up most of your hair"
+			},{
+			"dreadlocks": "have dreadlocks decorated with beads or bells"
+			},{
+			"Bald": "have no hair"
+			},{
+			"Top Knot": "no hair except for a single spot"
+			},{
+			"Crazy": "have a mohawks, spikes or weird colorings"
+			},{
+			"Wild": "have a mass of unkept hair"
+			}
+	]
+}

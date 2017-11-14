@@ -1,0 +1,12 @@
+{
+    "caretakers_status": [{
+			"Alive and well": "are alive and are doing well",
+			"weight":3
+			},{
+			"Misfortune": "has had something unfortunate happen to them, ",
+			"weight":1
+			},{
+			"Death": "your father, is alive but your mother is dead",
+			"weight":1
+			}]
+}
