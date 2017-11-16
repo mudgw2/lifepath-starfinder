@@ -92,15 +92,17 @@ function generate($json_name){
 		}
 }
 
-function siblings(){
+function siblings($race_selected){
 	$siblings = mt_rand(1,6);
 		if($siblings >=1 && $siblings <=5){
 		$number_of_siblings = mt_rand(1,12);
-		echo "with $number_of_siblings siblings.<br>";
+		echo "raised with $number_of_siblings siblings.<br/>";
 		for ($s = 1; $s <= $number_of_siblings; $s++) {
 
-			$fate = mt_rand(1,12);
+			$fate 	= mt_rand(1,12);
 			$gender = mt_rand(1,2);
+			$race 	= mt_rand(1,100);
+
 			if($gender == 1){
 					$gender_type = "brother";
 					$fname = generate_first_name('male');
@@ -108,33 +110,85 @@ function siblings(){
 					$gender_type = "sister";
 					$fname = generate_first_name('female');
 				}
+
+				// 70% chance that all siblings are of same race.  30% not
+				//$race_selected;
+
+				if($race  > 0 AND $race < 70){
+					$race_type =  $race_selected;
+				}else{
+						$other_race 	= mt_rand(1,100);
+					if($race_type = "Human"){
+						if($other_race > 0 AND $other_race < 50){
+								$race_type = "Android";
+						}
+						if($other_race > 50 AND $other_race < 60){
+								$race_type = "Shirren";
+						}
+						if($other_race > 60 AND $other_race < 75){
+								$race_type = "Kasatha";
+						}
+						if($other_race > 75 AND $other_race < 80){
+								$race_type = "Vesk";
+						}
+						if($other_race > 80 AND $other_race < 100){
+								$race_type = "Ysoki";
+						}
+					}
+					if($race_type = "Android"){
+						if($other_race > 0 AND $other_race < 50){
+								$race_type = "Human";
+						}
+						if($other_race > 50 AND $other_race < 60){
+								$race_type = "Shirren";
+						}
+						if($other_race > 60 AND $other_race < 75){
+								$race_type = "Kasatha";
+						}
+						if($other_race > 75 AND $other_race < 80){
+								$race_type = "Vesk";
+						}
+						if($other_race > 80 AND $other_race < 100){
+								$race_type = "Ysoki";
+						}
+					}
+				}
+
+
+			$gender = mt_rand(1,2);
+			if($gender == 1){
+					$gender_type = "brother";
+				}else{
+					$gender_type = "sister";
+				}
+
 			if($fate == 1 || $fate == 2){
-				echo "{$fname}, lost touch, it is unknown to you what became of them";
+				echo "{$fname}, {$race_type} {$gender_type} lost touch, it is unknown to you what became of them";
 			}
 			if($fate == 3 || $fate == 4){
-				echo "{$fname}, lives at home with your parents";
+				echo "{$fname}, {$race_type} {$gender_type} lives at home with your parents";
 			}
 			if($fate == 5 || $fate == 6){
-				echo "{$fname}, has had bad luck in life";
+				echo "{$fname}, {$race_type} {$gender_type} has had bad luck in life";
 				echo ", ";
 				generate('misfortune');
 			}
 			if($fate == 7 || $fate == 8){
-				echo "{$fname}, keeps in touch, they are enjoying their own life";
+				echo "{$fname}, {$race_type} {$gender_type} keeps in touch, they are enjoying their own life";
 			}
 			if($fate == 9 || $fate == 10){
-				echo "{$fname}, hates you, for some past transgression";
+				echo "{$fname}, {$race_type} {$gender_type} hates you, for some past transgression";
 			}
 			if($fate == 11 || $fate == 12){
-				echo "{$fname}, is dead";
+				echo "{$fname}, {$race_type} {$gender_type} is dead";
 				echo ", ";
 				generate('death');
 			}
-echo "<br>";
+echo "<br/><hr/>";
 		}
 	}
 	if($siblings == 6){
-		echo "as an only child.";
+		echo "are an only child.";
 	}
 
 }
@@ -142,7 +196,7 @@ echo "<br>";
 function tragedy(){
 	$fate = mt_rand(1,12);
 	if($fate == 1 || $fate == 2){
-		echo "you lost all your gold/possessions";
+		echo "you lost all your credits/possessions";
 	}
 	if($fate == 3 || $fate == 4){
 		echo "you made yourself indebted to someone or some group";
@@ -173,7 +227,6 @@ function windfall(){
 	}
 	if($fate == 7 || $fate == 8){
 		echo "You find a sibling you never knew you had";
-		siblings();
 	}
 	if($fate == 9 || $fate == 10){
 		echo "You find yourself a pet";
@@ -183,7 +236,7 @@ function windfall(){
 	}
 }
 
-function heft(){
+function enemy_heft(){
 	$fate = mt_rand(1,12);
 	if($fate == 1){
 		echo "This person has no real pull, only has themselves";
@@ -221,46 +274,92 @@ function heft(){
 	if($fate == 12){
 		echo "They are a member of the ruling family with pull anywhere within the kingdom, some beyond";
 	}
+
 	echo ".  They hate you because ";
 	animosity();
 }
+
+function friend_heft(){
+	$fate = mt_rand(1,12);
+	if($fate == 1){
+		echo "This person has no real pull, only has themselves";
+	}
+	if($fate == 2){
+		echo "They are apart of a clan all willing to lay their lives for them";
+	}
+	if($fate == 3){
+		echo "They are apart of a small gang";
+	}
+	if($fate == 4){
+		echo "They are apart of a large family";
+	}
+	if($fate == 5){
+		echo "They are a local hero that can pull on the resources of a single town";
+	}
+	if($fate == 6){
+		echo "They are a famous hero or major noble that can pull resources over an entire province";
+	}
+	if($fate == 7){
+		echo "They are apart of a mercenary outfit or part of the guard";
+	}
+	if($fate == 8){
+		echo "They have powerful connections with the black market and the criminal world";
+	}
+	if($fate == 9){
+		echo "They know someone who is a power unto himself, like a mage or a powerful priest";
+	}
+	if($fate == 10){
+		echo "They are connected to angelic or extra planar forces";
+	}
+	if($fate == 11){
+		echo "They have connections to dark demonic forces or something of an evil nature";
+	}
+	if($fate == 12){
+		echo "They are a member of the ruling family with pull anywhere within the kingdom, some beyond";
+	}
+
+	echo ".  They are your friend because ";
+	//animosity();
+}
+
+
 function animosity(){
 	$fate = mt_rand(1,12);
 	if($fate == 1){
-		echo "Humiliation - Caused the loss of face or status publicly";
+		echo "you caused the loss of face or status publicly";
 	}
 	if($fate == 2){
-		echo "Rift	- Caused the loss of a friend or lover";
+		echo "you caused the loss of a friend or lover";
 	}
 	if($fate == 3){
-		echo "Busted - Truly or falsely brought criminal charges against the person";
+		echo "you truly or falsely brought criminal charges against the person";
 	}
 	if($fate == 4){
-		echo "Betrayed - Left the other out to dry or outright backstabbing";
+		echo "you left the other out to dry or outright backstabbing";
 	}
 	if($fate == 5){
-		echo "Cold Shoulder	- Turned down for a job or turned down romantic advances";
+		echo "you turned down their job or romantic advances";
 	}
 	if($fate == 6){
-		echo "Rival	- Had been competing for a job or romantically and won over the other";
+		echo "you were commpeting for a job or romance and won";
 	}
 	if($fate == 7){
-		echo "Foiled - Caused the failure of some plot, quest or undertaking";
+		echo "you caused the failure of some plot, quest or undertaking";
 	}
 	if($fate == 8){
 		echo "because you defeated them in combat or game/gamble";
 	}
 	if($fate == 9){
-		echo "Bigotry - From race to religious beliefs, the hatred stems from stereotype";
+		echo "you are hated due to race and/or religious beliefs, the hatred stems from stereotype";
 	}
 	if($fate == 10){
-		echo "Murdered	- Convinced this person killed a friend/relative/lover";
+		echo "you murdered a friend/relative/lover";
 	}
 	if($fate == 11){
-		echo "Jealousy	- This person's looks/life/luck/wealth bother you";
+		echo "you made them jealous";
 	}
 	if($fate == 12){
-		echo "Took Advantage - Took economic advantage by scam, or physical advantage through force";
+		echo "you took economic advantage by scam, or physical advantage through force";
 	}
 }
 function intensity(){
@@ -340,8 +439,7 @@ function friend(){
 	if($fate == 12){
 		echo "Intelligent Creature	- Maybe you ran into a Sphinx or a Wemic and managed to take the proverbial thorn out of the proverbial paw<br>";
 	}
-	heft();
-	animosity();
+	friend_heft();
 }
 function enemy(){
 	echo "<div style='padding-left:20px;'>";
@@ -383,7 +481,7 @@ function enemy(){
 		echo "You have raised the anger of a dragon";
 	}
 	echo ".  ";
-	heft();
+	enemy_heft();
 	echo "</div>";
 }
 function enlightenment(){
@@ -465,40 +563,34 @@ function fate(){
 
 			$fate = mt_rand(1,12);
 			if($fate == 1 || $fate == 2){
-				echo "<div style='padding-left:20px;'>";
-				echo "A few years ago, ";
+				echo "<div class='card text-white bg-light mb-3'><div class='card-header'>Tragedy</div><div class='card-body'><p class='card-text' style='color:black;'>";
 				tragedy();
-				echo "</div>";
+				echo "</p></div></div>";
 			}
 			if($fate == 3 || $fate == 4){
-				echo "<h4>Windfall - <small>Lady luck smiles on you</small></h4>";
-				echo "<div style='padding-left:20px;'>";
+				echo "<div class='card text-white bg-success mb-3'><div class='card-header'>Windfall</div><div class='card-body'><p class='card-text'>";
 				windfall();
-				echo "</div>";
+				echo "</p></div></div>";
 			}
 			if($fate == 5 || $fate == 6){
-				echo "<h4>Made a Friend - <small>Someone enters your life in a beneficial way</small></h4>";
-				echo "<div style='padding-left:20px;'>";
+				echo "<div class='card text-white bg-light mb-3'><div class='card-header'>Made a Friend</div><div class='card-body'><p class='card-text' style='color:black;'>";
 				friend();
-				echo "</div>";
+				echo "</p></div></div>";
 			}
 			if($fate == 7 || $fate == 8){
-				echo "<h4>Made an Enemy - <small>You rubbed someone wrong</small></h4>";
-				echo "<div style='padding-left:20px;'>";
+				echo "<div class='card text-white bg-dark mb-3'><div class='card-header'>Enemy</div><div class='card-body'><p class='card-text'>";
 				enemy();
-				echo "</div>";
+				echo "</p></div></div>";
 			}
 			if($fate == 9 || $fate == 10){
-				echo "<h4>Romance - <small>A relationship develops</small></h4>";
-				echo "<div style='padding-left:20px;'>";
-
-				echo "</div>";
+				echo "<div class='card text-white bg-danger mb-3'><div class='card-header'>Romance</div><div class='card-body'><p class='card-text'>";
+				//romance();
+				echo "</p></div></div>";
 			}
 			if($fate == 11 || $fate == 12){
-				echo "<h4>Personal Enlightenment - <small>Events unfold that help you grow as a person</small></h4>";
-				echo "<div style='padding-left:20px;'>";
+				echo "<div class='card text-white bg-info mb-3'><div class='card-header'>Enlightenment</div><div class='card-body'><p class='card-text'>";
 				enlightenment();
-				echo "</div>";
+				echo "</p></div></div>";
 			}
 		}
 	}
