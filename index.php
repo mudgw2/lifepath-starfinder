@@ -16,33 +16,36 @@
 ?>
 <body id="page-top">
 <div class="container">
-
 <h1>Lifepath Generator<small class="pull-right">for Starfinder RPG</small></h1>
+ <header class="masthead mb-auto">
+	<nav class="navbar navbar-dark col-md-12 justify-content-end">
+	<form class="form-inline">
 
-<nav class="navbar navbar-dark">
-  <form class="form-inline">
+	<div class="form-group">
+	<!---<label for="RaceSelect1">Your Race&nbsp;
+	<select name="race" id="race_select" class="form-control" >
+	<option value="Human" selected>Human</option>
+	<option value="Android">Android</option>
+	</select></label>--->
+	<label for="RaceSelect1">Seed&nbsp;
+	<input class="form-control form-control-sm" name="seed" value="<?php if(isset($_GET['seed'])){echo $_GET['seed'];}else{echo time();}?>"/></label>
 
-		<div class="form-group pull-right">
-	<label for="RaceSelect1">Your Race&nbsp;
-		<select name="race" id="race_select" class="form-control" >
-			<option value="Human" selected>Human</option>
-			<option value="Android">Android</option>
-		</select></label>
-</div>
+	</div>
+	<button type="submit" class="btn btn-sm btn-primary">USE SEED</button>
+	<button type="submit" class="btn btn-sm btn-primary"><a href="/lifepath-starfinder">Refresh</a></button>
+	  </form>
 
-
-  </form>
-</nav>
-
+	</nav>
+</header>
 <?php
 $race_selected = "<script>document.write(localStorage.getItem('selected'));</script>";
 ?>
-
-
+<div class="col-md-12">
 <p>You grew up
 	<?php generate('birth');?>, raised by <?php generate('caretakers_origin');?>.  You come from a line of <?php generate('background');?>, and
 	<?php generate('environment');?>.  <?php generate('caretakers_status');?>.
 </p>
+</div>
 
 <div class="row">
 <div class="col-md-6">
@@ -86,6 +89,8 @@ $race_selected = "<script>document.write(localStorage.getItem('selected'));</scr
 
 
 </div>
+</div>
+
 </div>
 <script src="js/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

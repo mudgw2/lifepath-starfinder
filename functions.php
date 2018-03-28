@@ -1,19 +1,28 @@
 <?php
-//if(isset($_GET['seed'])){$GLOBALS['seed'] = $_GET['seed'];}else{$GLOBALS['seed'] = 42;}
-$GLOBALS['seed'] = time();
-srand($GLOBALS['seed']);
+if(isset($_GET['seed'])){$GLOBALS['seed'] = $_GET['seed'];}else{$GLOBALS['seed'] = time();}
+//$GLOBALS['seed'] = 1521733664;
+
+function SeedShuffle($seed,$array){
+	mt_srand($seed);
+	$order = array_map(create_function('$val', 'return mt_rand();'), range(1, count($array)));
+	array_multisort($order, $array);
+	return $array;
+}
 
 //Name generator
 function generate_first_name($gender){
+	//$seed = $GLOBALS['seed'];
+	$names = [];
 	if($gender == 'male'){
 		$names = array_map('str_getcsv', file('names/Human_Names_-_Western_Male.csv'));
 	}else{
 		$names = array_map('str_getcsv', file('names/Human_Names_-_Western_Female.csv'));
 	}
 	//Generate a random forename.
-	$random_name = $names[mt_rand(0, sizeof($names) - 1)];
+	//$first_name = SeedShuffle($GLOBALS['seed'],array_column($names, 1));
+	$first_name = $names[mt_rand(0, sizeof($names) - 1)];
 	//Combine them together and print out the result.
-	return $random_name[1];
+	return $first_name;
 }
 function generate_last_name(){
 	$surnames = array_map('str_getcsv', file('names/Human_Names_-_Western_Surname.csv'));
@@ -25,6 +34,9 @@ function generate_last_name(){
 
 // Generate the session
 function generate($json_name){
+	$seed = $GLOBALS['seed'];
+	mt_srand($seed);
+
 	$path = "json/".$json_name.".json";
 	$str = file_get_contents($path);
 	$result_array = [];
@@ -34,8 +46,6 @@ function generate($json_name){
 			error_modal("ERROR: Invalid {$json_name} json","Your {$json_name} json file is invalid, please correct and try again.<br>[See <a href='http://jsonlint.com/' target='_blank'>http://jsonlint.com/</a>]");
 		}else{
 			if (isset($json[$json_name])){
-				srand($GLOBALS['seed']);
-
 			//change this so json weight value factors into random selection
 
 			//IS WEIGHTED?
@@ -47,7 +57,7 @@ function generate($json_name){
 				$weight_sum += $val['weight'];
 			  }
 
-			  $rand_key = mt_rand(1, $weight_sum);
+			 $rand_key = mt_rand(1, $weight_sum);
 
 			  for($i = 0; $i < count($json[$json_name],0); $i++){
 				if($rand_key < $json[$json_name][$i]['weight'])
@@ -61,29 +71,39 @@ function generate($json_name){
 				$rand_key = array_rand($json[$json_name]);
 			}
 
-			$_SESSION['lifepath'][$json_name] = $json[$json_name][$rand_key];
-				foreach ($_SESSION['lifepath'][$json_name] as $key => $val) {
+			$rand_tmp = SeedShuffle($seed,$json[$json_name]);
+				foreach ($rand_tmp[0] as $key => $val) {
+
+
 					if($key != 'weight'){
 					$result_array[0] = $key;
 					$result_array[1] = $val;
+
+
 						if($json_name == 'birth'){
-							echo $result_array[1][0];
+
+						$birth_tmp = SeedShuffle($seed,$json[$json_name]);
+						$birth_tmp  = array_column($birth_tmp[0], 0);
+						echo $birth_tmp[0];
+
 						}elseif($json_name == 'caretakers_status'){
-							$father_name = generate_first_name('male');
-							$mother_name = generate_first_name('female');
-							echo "Your father {$father_name} and mother {$mother_name} ";
+							$father_name = generate_first_name('male',$seed);
+							$mother_name = generate_first_name('female',$seed);
+							echo "Your father <strong>{$father_name[1]}</strong> and mother <strong>{$mother_name[1]}</strong> ";
 							echo $result_array[1];
 						}else{
-							echo $result_array[1];
+							$tmp = SeedShuffle($GLOBALS['seed'],$result_array);
+							echo $tmp[0];
 						}
-							if($key == 'Misfortune'){
-								echo " ";
-								generate('misfortune');
-							}
-							if($key == 'Death'){
-								echo ", ";
-								generate('death');
-							}
+
+						if($key == 'Misfortune'){
+							echo " ";
+							generate('misfortune');
+						}
+						if($key == 'Death'){
+							echo ", ";
+							generate('death');
+						}
 					}
 				}
 			}else{
@@ -96,13 +116,12 @@ function siblings($race_selected){
 	$siblings = mt_rand(1,6);
 		if($siblings >=1 && $siblings <=5){
 		$number_of_siblings = mt_rand(1,12);
-		echo "raised with $number_of_siblings siblings.<br/>";
+		echo "were raised with $number_of_siblings siblings.<br/>";
+		echo "<ul class='list-group list-group-flush'>";
 		for ($s = 1; $s <= $number_of_siblings; $s++) {
-
-			$fate 	= mt_rand(1,12);
+			mt_srand($s); 
 			$gender = mt_rand(1,2);
 			$race 	= mt_rand(1,100);
-
 			if($gender == 1){
 					$gender_type = "brother";
 					$fname = generate_first_name('male');
@@ -110,6 +129,7 @@ function siblings($race_selected){
 					$gender_type = "sister";
 					$fname = generate_first_name('female');
 				}
+				$fname = $fname[1];
 
 				// 70% chance that all siblings are of same race.  30% not
 				//$race_selected;
@@ -118,7 +138,6 @@ function siblings($race_selected){
 					$race_type =  $race_selected;
 				}else{
 						$other_race 	= mt_rand(1,100);
-					if($race_type = "Human"){
 						if($other_race > 0 AND $other_race < 50){
 								$race_type = "Android";
 						}
@@ -134,34 +153,9 @@ function siblings($race_selected){
 						if($other_race > 80 AND $other_race < 100){
 								$race_type = "Ysoki";
 						}
-					}
-					if($race_type = "Android"){
-						if($other_race > 0 AND $other_race < 50){
-								$race_type = "Human";
-						}
-						if($other_race > 50 AND $other_race < 60){
-								$race_type = "Shirren";
-						}
-						if($other_race > 60 AND $other_race < 75){
-								$race_type = "Kasatha";
-						}
-						if($other_race > 75 AND $other_race < 80){
-								$race_type = "Vesk";
-						}
-						if($other_race > 80 AND $other_race < 100){
-								$race_type = "Ysoki";
-						}
-					}
 				}
-
-
-			$gender = mt_rand(1,2);
-			if($gender == 1){
-					$gender_type = "brother";
-				}else{
-					$gender_type = "sister";
-				}
-
+			$fate 	= mt_rand(1,12);
+			echo "<li class='list-group-item'>";
 			if($fate == 1 || $fate == 2){
 				echo "{$fname}, {$race_type} {$gender_type} lost touch, it is unknown to you what became of them";
 			}
@@ -184,8 +178,9 @@ function siblings($race_selected){
 				echo ", ";
 				generate('death');
 			}
-echo "<br/><hr/>";
+			echo "</li>";
 		}
+		echo "</ul>";
 	}
 	if($siblings == 6){
 		echo "are an only child.";
@@ -196,22 +191,22 @@ echo "<br/><hr/>";
 function tragedy(){
 	$fate = mt_rand(1,12);
 	if($fate == 1 || $fate == 2){
-		echo "you lost all your credits/possessions";
+		echo "You lost all your credits/possessions";
 	}
 	if($fate == 3 || $fate == 4){
-		echo "you made yourself indebted to someone or some group";
+		echo "You made yourself indebted to someone or some group";
 	}
 	if($fate == 5 || $fate == 6){
-		echo "you ended up imprisoned for several months";
+		echo "You ended up imprisoned for several months";
 	}
 	if($fate == 7 || $fate == 8){
-		echo "you had a serious accident that left you incapacitated for several months";
+		echo "You had a serious accident that left you incapacitated for several months";
 	}
 	if($fate == 9 || $fate == 10){
-		echo "you spent several months battling an addiction";
+		echo "You spent several months battling an addiction";
 	}
 	if($fate == 11 || $fate == 12){
-		echo "you lost a pet";
+		echo "You lost a pet";
 	}
 }
 function windfall(){
@@ -484,74 +479,199 @@ function enemy(){
 	enemy_heft();
 	echo "</div>";
 }
+
+function romance(){
+	echo "<div style='padding-left:20px;'>";
+	$fate = mt_rand(1,12);
+	if($fate == 1){
+		echo "Casual	The year is marked with relationships. You date several people throughout the year, each for about 1d12 weeks";
+	}
+	if($fate == 2){
+		echo "The year is marked with relationships. You date several people throughout the year, each for about 1d12 weeks";
+	}
+	if($fate == 3){
+		echo "You find a certain someone whom you date for 1d12 months";
+	}
+	if($fate == 4){
+		echo "You find a certain someone whom you date for 1d12 months";
+	}
+	if($fate == 5){
+		echo "A serious relationship has lasted into this year. Roll 1d12 - On a 1-5 it ends, on a 6-11 it continues through the year, on a 12 you marry";
+	}
+	if($fate == 6){
+		echo "A serious relationship has lasted into this year. Roll 1d12 - On a 1-5 it ends, on a 6-11 it continues through the year, on a 12 you marry";
+	}
+	if($fate == 7){
+		echo "You find someone else, while dating someone seriously. Roll 1d12 - odd they find out and dump you, even they never find out";
+	}
+	if($fate == 8){
+		echo "You find someone else, while dating someone seriously. Roll 1d12 - odd they find out and dump you, even they never find out";
+	}
+	if($fate == 9){
+		echo "Someone whom you'd been dating cheats on you. Roll 1d12. Even, you find out, odd they dump you and you don't know why";
+	}
+	if($fate == 10){
+		echo "Someone whom you'd been dating cheats on you. Roll 1d12. Even, you find out, odd they dump you and you don't know why";
+	}
+	if($fate == 11){
+		echo "Someone whom you'd been dating for over a year dies";
+	}
+	if($fate == 12){
+		echo "Pregnancy. Roll 1d12; 1-3 You leave, 4-6 He/she Leaves You, 7-8 You Marry, 9-12 Crossbow Point Wedding";
+	}
+	echo ".  ";
+
+	echo "</div>";
+}
+
+
 function enlightenment(){
+	echo "<div style='padding-left:20px;'>";
 	$fate = mt_rand(1,12);
 	if($fate == 1 || $fate == 2 ||  $fate == 3){
 		//Attribute Improvement
-		$fate = mt_rand(1,12);
-			if($fate == 1 || $fate == 2){
+		$fate_attr = mt_rand(1,12);
+			if($fate_attr == 1 || $fate_attr == 2){
 				echo "Heavy labor and little rest develop your muscles (gain +1 Strength)";
 			}
-			if($fate == 3 || $fate == 4){
+			if($fate_attr == 3 || $fate_attr == 4){
 				echo "Running with a band of rogues or maybe at the circuit with the jugglers sharpen your reflexes (gain +1 Dexterity)";
 			}
-			if($fate == 5 || $fate == 6){
+			if($fate_attr == 5 || $fate_attr == 6){
 				echo "Training under a veteran or ex-mercenary, or time spent in harsh terrains, toughens you (gain +1 Constitution)";
 			}
-			if($fate == 7 || $fate == 8){
+			if($fate_attr == 7 || $fate_attr == 8){
 				echo "Time spent at an university or with a scholar teaches valuable skills and how to apply rational thinking (gain +1 Intelligence)";
 			}
-			if($fate == 9 || $fate == 10){
+			if($fate_attr == 9 || $fate_attr == 10){
 				echo "A sage or priest schools you in the benefits of faith and strength of mind (gain +1 Wisdom)";
 			}
-			if($fate == 11 || $fate == 12){
+			if($fate_attr == 11 || $fate_attr == 12){
 				echo "You meet a very charismatic leader or powerful entertainer who teaches you the strength of assertiveness and charm (gain +1 Charisma)";
 			}
 
 	}
 	if($fate == 4 || $fate == 5 ||  $fate == 6){
 		//Skill Learning
-		/*
-		Strength Skill, New	You are able to learn a new Strength-based skill.
-		2	Strength Skill, Improvement	Through lots of practice or much use, one of your Strength-based skills improves.
-		3	Dexterity Skill, New	You are able to learn a new Dexterity-based skill.
-		4	Dexterity Skill, Improvement	Through lots of practice or much use, one of your Dexterity-based skills improves.
-		5	Constitution Skill, New	You are able to learn a new Constitution-based skill.
-		6	Constitution Skill, Improvement	Through lots of practice or much use, one of your Constitution-based skills improves.
-		7	Intelligence Skill, New	You are able to learn a new Intelligence-based skill.
-		8	Intelligence Skill, Improvement	Through lots of practice or much use, one of your Intelligence-based skills improves.
-		9	Wisdom Skill, New	You are able to learn a new Wisdom-based skill.
-		10	Wisdom Skill, Improvement	Through lots of practice or much use, one of your Wisdom-based skills improves.
-		11	Charisma Skill, New	You are able to learn a new Charisma-based skill.
-		12	Charisma Skill, Improvement	Through lots of practice or much use, one of your Charisma-based skills improves.
-		*/
+		$fate_attr = mt_rand(1,12);
+			if($fate_attr == 1){
+				echo "You are able to learn a new Strength-based skill.";
+			}
+			if($fate_attr == 2){
+				echo "Through lots of practice or much use, one of your Strength-based skills improves.";
+			}
+			if($fate_attr == 3){
+				echo "You are able to learn a new Dexterity-based skill.";
+			}
+			if($fate_attr == 4){
+				echo "Through lots of practice or much use, one of your Dexterity-based skills improves.";
+			}
+			if($fate_attr == 5){
+				echo "You are able to learn a new Constitution-based skill.";
+			}
+			if($fate_attr == 6){
+				echo "Through lots of practice or much use, one of your Constitution-based skills improves.";
+			}
+			if($fate_attr == 7){
+				echo "You are able to learn a new Intelligence-based skill.";
+			}
+			if($fate_attr == 8){
+				echo "Through lots of practice or much use, one of your Intelligence-based skills improves.";
+			}
+			if($fate_attr == 9){
+				echo "You are able to learn a new Wisdom-based skill.";
+			}
+			if($fate_attr == 10){
+				echo "Through lots of practice or much use, one of your Wisdom-based skills improves.";
+			}
+			if($fate_attr == 11){
+				echo "You are able to learn a new Charisma-based skill.";
+			}
+			if($fate_attr == 12){
+				echo "Through lots of practice or much use, one of your Charisma-based skills improves.";
+			}
 	}
 	if($fate == 7 || $fate == 8 ||  $fate == 9){
 		//Magical Ability
-		/*
-		1	Abjuration	You learn a new Abjuration spell.
-		2	Conjuration	You learn a new Conjuration spell.
-		3	Divination	You learn a new Divination spell.
-		4	Enchantment	You learn a new Enchantment spell.
-		5	Evocation	You learn a new Evocation spell.
-		6	Illusion	You learn a new Illusion spell.
-		7	Necromancy	You learn a new Necromancy spell.
-		8	Transmutation	You learn a new Transmutation spell.
-		9-10	Spell-Like Ability, 1/day	You somehow gain the ability to use a Spell-Like Ability 1/day
-		11-12	Supernatural Ability, 1/day	You somehow gain the ability to use a Supernatural Ability 1/day
-		*/
+		$fate_attr = mt_rand(1,12);
+			if($fate_attr == 1){
+				echo "You learn a new Abjuration spell.";
+			}
+			if($fate_attr == 2){
+				echo "You learn a new Conjuration spell.";
+			}
+			if($fate_attr == 3){
+				echo "You learn a new Divination spell.";
+			}
+			if($fate_attr == 4){
+				echo "You learn a new Enchantment spell.";
+			}
+			if($fate_attr == 5){
+				echo "You learn a new Evocation spell.";
+			}
+			if($fate_attr == 6){
+				echo "You learn a new Illusion spell.";
+			}
+			if($fate_attr == 7){
+				echo "You learn a new Necromancy spell.";
+			}
+			if($fate_attr == 8){
+				echo "You learn a new Transmutation spell.";
+			}
+			if($fate_attr == 9){
+				echo "1/day	You somehow gain the ability to use a Spell-Like Ability 1/day";
+			}
+			if($fate_attr == 10){
+				echo "1/day	You somehow gain the ability to use a Spell-Like Ability 1/day";
+			}
+			if($fate_attr == 11){
+				echo "1/day	You somehow gain the ability to use a Supernatural Ability 1/day";
+			}
+			if($fate_attr == 12){
+				echo "1/day	You somehow gain the ability to use a Supernatural Ability 1/day";
+			}
 	}
 	if($fate == 10 || $fate == 11 ||  $fate == 12){
 		//New Feat
-		/*
-		1-2	Weapon Proficiency	You learn how to use a weapon.
-		3-4	Armor or Shield Proficiency	You learn how to handle a type of armor or shield.
-		5-6	Skill Feat	You gain a feat (for which you meet the prerequisites) which only improves skill(s).
-		7-8	Basic Feat	You learn a new Feat that has no prerequisites.
-		9-10	General Feat	You learn a new General Feat for which you meet the prerequisites.
-		11-12	Feat	You learn a new Feat for which you meet the prerequisites.
-		*/
+			$fate_attr = mt_rand(1,12);
+			if($fate_attr == 1){
+				echo "You learn how to use a weapon.";
+			}
+			if($fate_attr == 2){
+				echo "You learn how to use a weapon.";
+			}
+			if($fate_attr == 3){
+				echo "You learn how to handle a type of armor or shield.";
+			}
+			if($fate_attr == 4){
+				echo "You learn how to handle a type of armor or shield.";
+			}
+			if($fate_attr == 5){
+				echo "You gain a feat (for which you meet the prerequisites) which only improves skill(s).";
+			}
+			if($fate_attr == 6){
+				echo "You gain a feat (for which you meet the prerequisites) which only improves skill(s).";
+			}
+			if($fate_attr == 7){
+				echo "You learn a new Feat that has no prerequisites.";
+			}
+			if($fate_attr == 8){
+				echo "You learn a new Feat that has no prerequisites.";
+			}
+			if($fate_attr == 9){
+				echo "You learn a new General Feat for which you meet the prerequisites.";
+			}
+			if($fate_attr == 10){
+				echo "You learn a new General Feat for which you meet the prerequisites.";
+			}
+			if($fate_attr == 11){
+				echo "You learn a new Feat for which you meet the prerequisites.";
+			}
+			if($fate_attr == 12){
+				echo "You learn a new Feat for which you meet the prerequisites.";
+			}
 	}
+	echo "</div>";
 }
 
 function fate(){
@@ -584,7 +704,7 @@ function fate(){
 			}
 			if($fate == 9 || $fate == 10){
 				echo "<div class='card text-white bg-danger mb-3'><div class='card-header'>Romance</div><div class='card-body'><p class='card-text'>";
-				//romance();
+				romance();
 				echo "</p></div></div>";
 			}
 			if($fate == 11 || $fate == 12){
