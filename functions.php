@@ -3,32 +3,34 @@ if(isset($_GET['seed'])){$GLOBALS['seed'] = $_GET['seed'];}else{$GLOBALS['seed']
 //$GLOBALS['seed'] = 1521733664;
 
 function SeedShuffle($seed,$array){
-	mt_srand($seed);
-	$order = array_map(create_function('$val', 'return mt_rand();'), range(1, count($array)));
-	array_multisort($order, $array);
-	return $array;
+	$tmp = array();
+    for ($rest = $count = count($array);$count>0;$count--) {
+        $seed %= $count;
+        $t = array_splice($array,$seed,1);
+        $tmp[] = $t[0];
+        $seed = $seed*$seed + $rest;
+    }
+    return $tmp;
 }
 
 //Name generator
 function generate_first_name($gender){
-	//$seed = $GLOBALS['seed'];
 	$names = [];
 	if($gender == 'male'){
 		$names = array_map('str_getcsv', file('names/Human_Names_-_Western_Male.csv'));
 	}else{
 		$names = array_map('str_getcsv', file('names/Human_Names_-_Western_Female.csv'));
 	}
-	//Generate a random forename.
-	//$first_name = SeedShuffle($GLOBALS['seed'],array_column($names, 1));
+	//Generate a random forename
 	$first_name = $names[mt_rand(0, sizeof($names) - 1)];
 	//Combine them together and print out the result.
 	return $first_name;
 }
 function generate_last_name(){
 	$surnames = array_map('str_getcsv', file('names/Human_Names_-_Western_Surname.csv'));
-	//Generate a random surname.
+	//Generate a random surname
 	$random_surname = $surnames[mt_rand(0, sizeof($surnames) - 1)];
-	//Combine them together and print out the result.
+	//Combine them together and print out the result
 	$GLOBALS['lname'] = $random_surname[1];
 }
 
@@ -73,36 +75,33 @@ function generate($json_name){
 
 			$rand_tmp = SeedShuffle($seed,$json[$json_name]);
 				foreach ($rand_tmp[0] as $key => $val) {
-
+					if($key == 'Misfortune'){
+						echo " ";
+						generate('misfortune');
+					}
+					if($key == 'Death'){
+						echo ", ";
+						generate('death');
+					}
 
 					if($key != 'weight'){
 					$result_array[0] = $key;
 					$result_array[1] = $val;
-
-
 						if($json_name == 'birth'){
-
-						$birth_tmp = SeedShuffle($seed,$json[$json_name]);
-						$birth_tmp  = array_column($birth_tmp[0], 0);
-						echo $birth_tmp[0];
-
+							$birth_tmp = SeedShuffle($seed,$json[$json_name]);
+							$birth_tmp  = array_column($birth_tmp[0], 0);
+							echo $birth_tmp[0];
 						}elseif($json_name == 'caretakers_status'){
 							$father_name = generate_first_name('male',$seed);
 							$mother_name = generate_first_name('female',$seed);
 							echo "Your father <strong>{$father_name[1]}</strong> and mother <strong>{$mother_name[1]}</strong> ";
 							echo $result_array[1];
+						}elseif($json_name == 'races'){
+							generate_race_list($val);
 						}else{
 							$tmp = SeedShuffle($GLOBALS['seed'],$result_array);
-							echo $tmp[0];
-						}
-
-						if($key == 'Misfortune'){
-							echo " ";
-							generate('misfortune');
-						}
-						if($key == 'Death'){
-							echo ", ";
-							generate('death');
+							//echo $tmp[1];
+							echo $val;
 						}
 					}
 				}
@@ -111,79 +110,164 @@ function generate($json_name){
 			}
 		}
 }
+//Races Generator
+function generate_race_list($val){
+	$seed = $GLOBALS['seed'];
+	mt_srand($seed);
+	$path = "json/races.json";
+	$str = file_get_contents($path);
+	$json = json_decode($str, true); // decode the JSON into an associative array
+	$races = [];
+	$rand_key = array_rand($json['races']);
+	//$race_name = $json['races'][$rand_key]['name'];
+		if ($json === null
+		&& json_last_error() !== JSON_ERROR_NONE) {
+			error_modal("ERROR: Invalid {$json_name} json","Your {$json_name} json file is invalid, please correct and try again.<br>[See <a href='http://jsonlint.com/' target='_blank'>http://jsonlint.com/</a>]");
+		}else{
+			foreach($json['races'] as $race)
+			{
+			  echo "<option value='" .$race['name'];
+			  if($val == $race['name']){
+				echo "' selected>";
+			  }else{
+				echo "'>";
+			  }
+			  echo $race['name'];
+			  echo "</option>";
+			}
+		}
+
+}
+function get_race_info($race_selected){
+	$path = "json/races.json";
+	$str = file_get_contents($path);
+	$json = json_decode($str, true); // decode the JSON into an associative array
+	$races = [];
+	if ($json === null
+	&& json_last_error() !== JSON_ERROR_NONE) {
+		error_modal("ERROR: Invalid {$json_name} json","Your {$json_name} json file is invalid, please correct and try again.<br>[See <a href='http://jsonlint.com/' target='_blank'>http://jsonlint.com/</a>]");
+	}else{
+		foreach($json['races'] as $race)
+		{
+			if($race['name'] === $race_selected){
+				echo $race['desc'];
+				echo "<div class='row p-3 bg-secondary text-white'>";
+				echo "<div class='col'>Avg. Height:&nbsp;";
+				echo $race['avgheightmin'];
+				echo "&nbsp;-&nbsp;";
+				echo $race['avgheightmax'];
+				echo "&nbsp;ft.</div>";
+				echo "<div class='col'>Avg. Weight:&nbsp;";
+				echo $race['avgheightmax'];
+				echo "&nbsp;-&nbsp;";
+				echo $race['avgheightmax'];
+				echo "&nbsp;lbs.</div>";
+				echo "<div class='col'>Maturity:&nbsp;";
+				echo $race['maturationyear'];
+				echo "&nbsp;yrs.</div>";
+				echo "<div class='col'>Maximum Age:&nbsp;";
+				echo $race['maxage'];
+				echo "</div>";
+				echo "</div>";
+				echo "<span class='float-right'><a href='";
+				echo $race['link'];
+				echo "' target='_blank'>";
+				echo $race['link'];
+				echo "</a></span>";
+			}
+		}
+	}
+} 
 
 function siblings($race_selected){
-	$siblings = mt_rand(1,6);
-		if($siblings >=1 && $siblings <=5){
-		$number_of_siblings = mt_rand(1,12);
-		echo "were raised with $number_of_siblings siblings.<br/>";
-		echo "<ul class='list-group list-group-flush'>";
-		for ($s = 1; $s <= $number_of_siblings; $s++) {
-			mt_srand($s); 
-			$gender = mt_rand(1,2);
-			$race 	= mt_rand(1,100);
-			if($gender == 1){
-					$gender_type = "brother";
-					$fname = generate_first_name('male');
-				}else{
-					$gender_type = "sister";
-					$fname = generate_first_name('female');
+	$path = "json/races.json";
+	$str = file_get_contents($path);
+	$json = json_decode($str, true); // decode the JSON into an associative array
+	$races = [];
+	if ($json === null
+	&& json_last_error() !== JSON_ERROR_NONE) {
+		error_modal("ERROR: Invalid {$json_name} json","Your {$json_name} json file is invalid, please correct and try again.<br>[See <a href='http://jsonlint.com/' target='_blank'>http://jsonlint.com/</a>]");
+	}else{
+		foreach($json['races'] as $race)
+		{
+			if($race['name'] === $race_selected){
+				$max = $race['maxsiblings'];
+				$siblings = mt_rand(0,$max);
+				if($siblings >1 && $siblings <=$max){
+				echo "were raised with $siblings siblings.<br/>";
+				echo "<ul class='list-group list-group-flush'>";
+				for ($s = 1; $s <= $siblings; $s++) {
+					mt_srand($s); 
+					$gender = mt_rand(1,2);
+					$race 	= mt_rand(1,100);
+					if($gender == 1){
+							$gender_type = "brother";
+							$fname = generate_first_name('male');
+						}else{
+							$gender_type = "sister";
+							$fname = generate_first_name('female');
+						}
+						$fname = $fname[1];
+		
+						if($race  > 0 AND $race < 80){
+							$race_type =  $race_selected;
+						}else{
+								$other_race 	= mt_rand(1,100);
+								if($other_race > 0 AND $other_race < 50){
+										$race_type = "Human (Adopted)";
+								}
+								if($other_race > 50 AND $other_race < 55){
+										$race_type = "Shirren (Adopted)";
+								}
+								if($other_race > 55 AND $other_race < 65){
+										$race_type = "Kasatha (Adopted)";
+								}
+								if($other_race > 65 AND $other_race < 70){
+										$race_type = "Vesk (Adopted)";
+								}
+								if($other_race > 70 AND $other_race < 90){
+										$race_type = "Ysoki (Adopted)";
+								}
+								if($other_race > 90 AND $other_race < 100){
+									$race_type = "Other (Adopted)";
+								}
+						}
+					$fate 	= mt_rand(1,12);
+					echo "<li class='list-group-item'>";
+					if($fate == 1 || $fate == 2){
+						echo "{$fname}, {$race_type} {$gender_type} lost touch, it is unknown to you what became of them";
+					}
+					if($fate == 3 || $fate == 4){
+						echo "{$fname}, {$race_type} {$gender_type} lives at home with your parents";
+					}
+					if($fate == 5 || $fate == 6){
+						echo "{$fname}, {$race_type} {$gender_type} has had bad luck in life";
+						echo ", ";
+						generate('misfortune');
+					}
+					if($fate == 7 || $fate == 8){
+						echo "{$fname}, {$race_type} {$gender_type} keeps in touch, they are enjoying their own life";
+					}
+					if($fate == 9 || $fate == 10){
+						echo "{$fname}, {$race_type} {$gender_type} hates you, for some past transgression";
+					}
+					if($fate == 11 || $fate == 12){
+						echo "{$fname}, {$race_type} {$gender_type} is dead";
+						echo ", ";
+						generate('death');
+					}
+					echo "</li>";
 				}
-				$fname = $fname[1];
-
-				// 70% chance that all siblings are of same race.  30% not
-				//$race_selected;
-
-				if($race  > 0 AND $race < 70){
-					$race_type =  $race_selected;
-				}else{
-						$other_race 	= mt_rand(1,100);
-						if($other_race > 0 AND $other_race < 50){
-								$race_type = "Android";
-						}
-						if($other_race > 50 AND $other_race < 60){
-								$race_type = "Shirren";
-						}
-						if($other_race > 60 AND $other_race < 75){
-								$race_type = "Kasatha";
-						}
-						if($other_race > 75 AND $other_race < 80){
-								$race_type = "Vesk";
-						}
-						if($other_race > 80 AND $other_race < 100){
-								$race_type = "Ysoki";
-						}
-				}
-			$fate 	= mt_rand(1,12);
-			echo "<li class='list-group-item'>";
-			if($fate == 1 || $fate == 2){
-				echo "{$fname}, {$race_type} {$gender_type} lost touch, it is unknown to you what became of them";
+				echo "</ul>";
 			}
-			if($fate == 3 || $fate == 4){
-				echo "{$fname}, {$race_type} {$gender_type} lives at home with your parents";
+			if($siblings == 0 && $race_selected != 'Android'){
+				echo "are an only child.";
 			}
-			if($fate == 5 || $fate == 6){
-				echo "{$fname}, {$race_type} {$gender_type} has had bad luck in life";
-				echo ", ";
-				generate('misfortune');
+			if($siblings == 0 && $race_selected == 'Android'){
+				echo "were manufactured.";
 			}
-			if($fate == 7 || $fate == 8){
-				echo "{$fname}, {$race_type} {$gender_type} keeps in touch, they are enjoying their own life";
 			}
-			if($fate == 9 || $fate == 10){
-				echo "{$fname}, {$race_type} {$gender_type} hates you, for some past transgression";
-			}
-			if($fate == 11 || $fate == 12){
-				echo "{$fname}, {$race_type} {$gender_type} is dead";
-				echo ", ";
-				generate('death');
-			}
-			echo "</li>";
 		}
-		echo "</ul>";
-	}
-	if($siblings == 6){
-		echo "are an only child.";
 	}
 
 }
@@ -675,12 +759,33 @@ function enlightenment(){
 }
 
 function fate(){
-	$yrs = mt_rand(1,12);
-		if($yrs >=1 && $yrs <=12){
-
-		$fate = mt_rand(1,12);
-		for ($s = 1; $s <= $fate; $s++) {
-
+	$race_selected = $_COOKIE['race'];
+	$fate_years = mt_rand(0,12); 
+	$seed = $GLOBALS['seed'];
+	mt_srand($seed);
+	$path = "json/races.json";
+	$str = file_get_contents($path);
+	$json = json_decode($str, true);
+	$races = [];
+	$rand_key = array_rand($json['races']);
+		if ($json === null
+		&& json_last_error() !== JSON_ERROR_NONE) {
+			error_modal("ERROR: Invalid {$json_name} json","Your {$json_name} json file is invalid, please correct and try again.<br>[See <a href='http://jsonlint.com/' target='_blank'>http://jsonlint.com/</a>]");
+		}else{
+			foreach($json['races'] as $race)
+			{
+			  if($race_selected == $race['name']){
+				$current_age = $race['maturationyear']+$fate_years;
+				echo "<p>Your Current Age: ";
+				echo $current_age;
+				echo "</p>";
+			  }
+			}
+		}
+		if($fate_years >=1 && $fate_years <=12){
+	
+		for ($s = 1; $s <= $fate_years; $s++) {
+			echo "Year - $s";
 			$fate = mt_rand(1,12);
 			if($fate == 1 || $fate == 2){
 				echo "<div class='card text-white bg-light mb-3'><div class='card-header'>Tragedy</div><div class='card-body'><p class='card-text' style='color:black;'>";
@@ -718,17 +823,21 @@ function fate(){
 
 //Handle Errors
 function error_modal($title,$message){
-	echo '<div class="modal fade" tabindex="-1" role="dialog" id="myModal">
-	  <div class="modal-dialog">
+	echo '<div class="modal fade" tabindex="-1" role="dialog" id="ErrorModal" aria-hidden="true" data-backdrop="false">
+	  <div class="modal-dialog" role="document">
 		<div class="modal-content">
 		  <div class="modal-header alert-danger">
-			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<h4 class="modal-title">';
+		  <h5 class="modal-title" id="exampleModalLabel">';
 			echo $title;
-			echo '</h4></div><div class="modal-body">';
+			echo '</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+			</div>
+			<div class="modal-body">';
 			echo $message;
-		  echo '</div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div></div></div></div>
-		  <script>$("#myModal").modal();</script>';
+		  echo '</div><div class="modal-footer">
+		  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		</div></div></div></div><script>$("#ErrorModal").modal();</script>';
 }
 
 

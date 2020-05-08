@@ -1,27 +1,27 @@
 {
     "caretakers_origin": [{
-			"Original Parents": "your natural parents",
+			"caretaker": "your natural parents",
 			"weight":3
 			},{
-			"Close Family": "your uncle",
+			"caretaker": "your uncle",
 			"weight":2
 			},{
-			"Close Family": "your aunt",
+			"caretaker": "your aunt",
 			"weight":2
 			},{
-			"Close Family": "your grandfather",
+			"caretaker": "your grandfather",
 			"weight":2
 			},{
-			"Adopted": "a couple not related to you and you never knew your natural parents",
+			"caretaker": "a couple not related to you and you never knew your natural parents",
 			"weight":3
 			},{
-			"Institution": "an institution, be it an orphanage, monastery or other",
+			"caretaker": "an institution, be it an orphanage, monastery or other",
 			"weight":1
 			},{
-			"Master": "as property and your parents and sold you at an early age",
+			"caretaker": "criminals as property and your parents and sold you at an early age",
 			"weight":1
 			},{
-			"Alone": "noone",
+			"caretaker": "noone",
 			"weight":1
 			}
 	]
