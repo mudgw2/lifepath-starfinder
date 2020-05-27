@@ -1,0 +1,28 @@
+{
+    "caretakers_origin": [{
+			"caretaker": "your natural parents",
+			"weight":3
+			},{
+			"caretaker": "your uncle",
+			"weight":2
+			},{
+			"caretaker": "your aunt",
+			"weight":2
+			},{
+			"caretaker": "your grandfather",
+			"weight":2
+			},{
+			"caretaker": "a couple not related to you and you never knew your natural parents",
+			"weight":3
+			},{
+			"caretaker": "an institution, be it an orphanage, monastery or other",
+			"weight":1
+			},{
+			"caretaker": "criminals as property and your parents and sold you at an early age",
+			"weight":1
+			},{
+			"caretaker": "noone",
+			"weight":1
+			}
+	]
+}

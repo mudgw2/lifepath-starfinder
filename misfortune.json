@@ -1,0 +1,26 @@
+{
+    "misfortune": [{
+			"Cult": "they are involved with a cult"
+			},{
+			"Addiction": "they are addicted to drugs"
+			},{
+			"Crippled": "they had an accident, causing a partial or complete incapacitation"
+			},{
+			"Cursed": "they contracted lycanthropy"
+			},{
+			"Taken": "they were taken roaming barbarians"
+			},{
+			"Taken": "they were taken by slavers"
+			},{
+			"Indentured Servant": "they had bad dealings and large debt to be paid off by labor"
+			},{
+			"Bankruptcy": "they are responsible, directly or indirectly, for the loss of all gold and lands"
+			},{
+			"Crazy": "they had a complete mental breakdown"
+			},{
+			"Prison": "Situations led to long term incarceration"
+			},{
+			"Unknown": "nobody is sure exactly what"
+			}
+	]
+}

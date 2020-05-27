@@ -1,0 +1,25 @@
+{
+    "death": [{
+			"Warfare": "a raid upon your home lead to the death"
+			},{
+			"Warfare": "a siege upon your home lead to the death"
+			},{
+			"Disease": "from a simple cold caused death"
+			},{
+			"Disease": "Pox caused death"
+			},{
+			"Accident": "from a mule kicking"
+			},{
+			"Accident": "a fire"
+			},{
+			"Murdered": "From a random pick pocket"
+			},{
+			"Murdered": "possibly assassinated"
+			},{
+			"Unknown": "under mysterious circumstances"
+			},{
+			"Murdered by You": "You did the killing"
+			}
+	]
+}
+
