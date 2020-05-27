@@ -1,5 +1,6 @@
 <?php
-if(isset($_GET['seed'])){$GLOBALS['seed'] = $_GET['seed'];}else{$GLOBALS['seed'] = time();}
+if(isset($_POST['seed'])){$GLOBALS['seed'] = $_POST['seed'];}else{$GLOBALS['seed'] = time();}
+
 //$GLOBALS['seed'] = 1521733664;
 
 function SeedShuffle($seed,$array){
@@ -49,7 +50,6 @@ function generate($json_name){
 		}else{
 			if (isset($json[$json_name])){
 			//change this so json weight value factors into random selection
-
 			//IS WEIGHTED?
 			if(isset($json[$json_name][0]['weight'])){
 			//weighting results
@@ -96,14 +96,14 @@ function generate($json_name){
 							$mother_name = generate_first_name('female',$seed);
 							echo "Your father <strong>{$father_name[1]}</strong> and mother <strong>{$mother_name[1]}</strong> ";
 							echo $result_array[1];
-						}elseif($json_name == 'races'){
-							generate_race_list($val);
 						}else{
 							$tmp = SeedShuffle($GLOBALS['seed'],$result_array);
-							//echo $tmp[1];
 							echo $val;
 						}
 					}
+				}
+				if($json_name == 'races'){
+					generate_race_list();
 				}
 			}else{
 				error_modal('ERROR: Invalid {$json_name} type selected','Your {$json_name} type selection is invalid, please correct and try again.');
@@ -111,34 +111,42 @@ function generate($json_name){
 		}
 }
 //Races Generator
-function generate_race_list($val){
-	$seed = $GLOBALS['seed'];
-	mt_srand($seed);
+function generate_race_list(){
 	$path = "json/races.json";
 	$str = file_get_contents($path);
 	$json = json_decode($str, true); // decode the JSON into an associative array
-	$races = [];
-	$rand_key = array_rand($json['races']);
-	//$race_name = $json['races'][$rand_key]['name'];
+	$max = count($json['races']);
+
+	$seed = $GLOBALS['seed'];
+	mt_srand($seed);
+	$raceCount = mt_rand(0,$max);
+	$GLOBALS['race'] = $raceCount;
 		if ($json === null
 		&& json_last_error() !== JSON_ERROR_NONE) {
 			error_modal("ERROR: Invalid {$json_name} json","Your {$json_name} json file is invalid, please correct and try again.<br>[See <a href='http://jsonlint.com/' target='_blank'>http://jsonlint.com/</a>]");
 		}else{
 			foreach($json['races'] as $race)
 			{
-			  echo "<option value='" .$race['name'];
-			  if($val == $race['name']){
-				echo "' selected>";
-			  }else{
-				echo "'>";
-			  }
-			  echo $race['name'];
-			  echo "</option>";
+				echo "<option value='" .$race['name'];
+				echo "' ";
+				if($_POST['race_select'] and $_POST['race_select']  != ""){
+					//If user selected a specific race
+					if($race['name'] == $_POST['race_select']){
+						echo " selected ";
+					}
+				}elseif($race['id'] == $raceCount){
+					//Select current seeded race
+					echo " selected ";
+				}
+				
+				echo ">";
+				echo $race['name'];
+				echo "</option>";
 			}
 		}
 
 }
-function get_race_info($race_selected){
+function get_race_info(){
 	$path = "json/races.json";
 	$str = file_get_contents($path);
 	$json = json_decode($str, true); // decode the JSON into an associative array
@@ -149,7 +157,7 @@ function get_race_info($race_selected){
 	}else{
 		foreach($json['races'] as $race)
 		{
-			if($race['name'] === $race_selected){
+			if($race['id'] == $GLOBALS['race']){
 				echo $race['desc'];
 				echo "<div class='row p-3 bg-secondary text-white'>";
 				echo "<div class='col'>Avg. Height:&nbsp;";
@@ -176,10 +184,12 @@ function get_race_info($race_selected){
 				echo "</a></span>";
 			}
 		}
+
+		
 	}
 } 
 
-function siblings($race_selected){
+function siblings(){
 	$path = "json/races.json";
 	$str = file_get_contents($path);
 	$json = json_decode($str, true); // decode the JSON into an associative array
@@ -190,7 +200,7 @@ function siblings($race_selected){
 	}else{
 		foreach($json['races'] as $race)
 		{
-			if($race['name'] === $race_selected){
+			if($race['id'] == $GLOBALS['race']){
 				$max = $race['maxsiblings'];
 				$siblings = mt_rand(0,$max);
 				if($siblings >1 && $siblings <=$max){
@@ -229,7 +239,7 @@ function siblings($race_selected){
 										$race_type = "Ysoki (Adopted)";
 								}
 								if($other_race > 90 AND $other_race < 100){
-									$race_type = "Other (Adopted)";
+										$race_type = "Other (Adopted)";
 								}
 						}
 					$fate 	= mt_rand(1,12);
@@ -260,10 +270,10 @@ function siblings($race_selected){
 				}
 				echo "</ul>";
 			}
-			if($siblings == 0 && $race_selected != 'Android'){
+			if($siblings == 0 && $race['name'] != 'Android'){
 				echo "are an only child.";
 			}
-			if($siblings == 0 && $race_selected == 'Android'){
+			if($siblings == 0 && $race['name'] == 'Android'){
 				echo "were manufactured.";
 			}
 			}
@@ -294,24 +304,45 @@ function tragedy(){
 	}
 }
 function windfall(){
-	$fate = mt_rand(1,12);
-	if($fate == 1 || $fate == 2){
-		echo "You nearly double your worth";
+	$fate = mt_rand(1,13);
+	if($fate == 1){
+		echo "You double your worth (2x starting money)";
 	}
-	if($fate == 3 || $fate == 4){
+	if($fate == 2){
 		echo "You managed to be at the right place and at the right time and someone owes you";
 	}
-	if($fate == 5 || $fate == 6){
-		echo "Through your deeds you manage to make a name for yourself locally";
+	if($fate == 3){
+		echo "Through your deeds you manage to make a name for yourself locally (Starting REP+4)";
 	}
-	if($fate == 7 || $fate == 8){
+	if($fate == 4){
 		echo "You find a sibling you never knew you had";
 	}
-	if($fate == 9 || $fate == 10){
-		echo "You find yourself a pet";
+	if($fate == 5){
+		echo "You find yourself a pet (Any 1/3 CR creature)";
 	}
-	if($fate == 11 || $fate == 12){
-		echo "The opportunity arises to travel to far distant lands for several months";
+	if($fate == 6){
+		echo "The opportunity arises to travel to far distant lands for several months (Knowledge culture +2 ranks)";
+	}
+	if($fate == 7){
+		echo "Gain combat training (+1 to hit with a chosen weapon)";
+	}
+	if($fate == 8){
+		echo "Obtain a goblin junkcycle";
+	}
+	if($fate == 9){
+		echo "Obtain an enercycle";
+	}
+	if($fate == 10){
+		echo "Obtain Second Skin&trade; armor";
+	}
+	if($fate == 11){
+		echo "Obtain Freebooter I armor";
+	}
+	if($fate == 12){
+		echo "Obtain a Wanderer Shuttle";
+	}
+	if($fate == 13){
+		echo "Obtain a Voidrunner Racer";
 	}
 }
 
@@ -398,7 +429,7 @@ function friend_heft(){
 	}
 
 	echo ".  They are your friend because ";
-	//animosity();
+	friendship();
 }
 
 
@@ -439,6 +470,77 @@ function animosity(){
 	}
 	if($fate == 12){
 		echo "you took economic advantage by scam, or physical advantage through force";
+	}
+	fracked();
+}
+function fracked(){
+	$fate = mt_rand(1,3);
+	if($fate == 1){
+		echo ". ";
+	}
+	if($fate == 2){
+		echo ", and you hate them. ";
+	}
+	if($fate == 3){
+		echo ", and you hate each other for it. ";
+	}
+	fracked2();
+	
+}
+function fracked2(){
+	$fate = mt_rand(1,4);
+	if($fate == 1){
+		echo "If you see them, you will go into a murderous killing rage and rip their face off! ";
+	}
+	if($fate == 2){
+		echo "If you see them, you will avoid the scum. ";
+	}
+	if($fate == 3){
+		echo "If you find them, you will backstab them indirectly. ";
+	}
+	if($fate == 4){
+		echo "If you see them, you will rip into them verbally. ";
+	}	
+}
+
+
+function friendship(){
+	$fate = mt_rand(1,12);
+	if($fate == 1){
+		echo "you caused them to gain face or status publicly";
+	}
+	if($fate == 2){
+		echo "you caused them to find a friend or lover";
+	}
+	if($fate == 3){
+		echo "you got criminal charges against the person dropped";
+	}
+	if($fate == 4){
+		echo "you saved them from being left out to dry or an outright backstabbing";
+	}
+	if($fate == 5){
+		echo "you found them their job";
+	}
+	if($fate == 6){
+		echo "you were commpeting for a job or romance and gave in on purpose";
+	}
+	if($fate == 7){
+		echo "you were instramental in some plot, quest or undertaking";
+	}
+	if($fate == 8){
+		echo "because you defeated them in combat or game/gamble";
+	}
+	if($fate == 9){
+		echo "you are liked due to race and/or religious beliefs";
+	}
+	if($fate == 10){
+		echo "you saved a friend/relative/lover";
+	}
+	if($fate == 11){
+		echo "you made them envious";
+	}
+	if($fate == 12){
+		echo "you gave them an economic advantage by scam, or physical advantage through force";
 	}
 }
 function intensity(){
@@ -785,35 +887,40 @@ function fate(){
 		if($fate_years >=1 && $fate_years <=12){
 	
 		for ($s = 1; $s <= $fate_years; $s++) {
-			echo "Year - $s";
 			$fate = mt_rand(1,12);
 			if($fate == 1 || $fate == 2){
-				echo "<div class='card text-white bg-light mb-3'><div class='card-header'>Tragedy</div><div class='card-body'><p class='card-text' style='color:black;'>";
+				echo "<div class='card text-white bg-light'><div class='card-header'>
+				<span class='badge badge-dark'>Year - {$s}</span> <span class='float-right'>You had a tragedy</span></div><div class='card-body'><p class='card-text' style='color:black;'>";
 				tragedy();
 				echo "</p></div></div>";
 			}
 			if($fate == 3 || $fate == 4){
-				echo "<div class='card text-white bg-success mb-3'><div class='card-header'>Windfall</div><div class='card-body'><p class='card-text'>";
+				echo "<div class='card text-white bg-success'><div class='card-header'>
+				<span class='badge badge-dark'>Year - {$s}</span> <span class='float-right'>You had a windfall!</span></div><div class='card-body'><p class='card-text'>";
 				windfall();
 				echo "</p></div></div>";
 			}
 			if($fate == 5 || $fate == 6){
-				echo "<div class='card text-white bg-light mb-3'><div class='card-header'>Made a Friend</div><div class='card-body'><p class='card-text' style='color:black;'>";
+				echo "<div class='card text-white bg-light'><div class='card-header'>
+				<span class='badge badge-dark'>Year - {$s}</span> <span class='float-right'>You made a Friend</span></div><div class='card-body'><p class='card-text' style='color:black;'>";
 				friend();
 				echo "</p></div></div>";
 			}
 			if($fate == 7 || $fate == 8){
-				echo "<div class='card text-white bg-dark mb-3'><div class='card-header'>Enemy</div><div class='card-body'><p class='card-text'>";
+				echo "<div class='card text-white bg-dark'><div class='card-header'>
+				<span class='badge badge-dark'>Year - {$s}</span> <span class='float-right'>You made an Enemy</span></div><div class='card-body'><p class='card-text'>";
 				enemy();
 				echo "</p></div></div>";
 			}
 			if($fate == 9 || $fate == 10){
-				echo "<div class='card text-white bg-danger mb-3'><div class='card-header'>Romance</div><div class='card-body'><p class='card-text'>";
+				echo "<div class='card text-white bg-danger'><div class='card-header'>
+				<span class='badge badge-dark'>Year - {$s}</span> <span class='float-right'>Found romance!</span></div><div class='card-body'><p class='card-text'>";
 				romance();
 				echo "</p></div></div>";
 			}
 			if($fate == 11 || $fate == 12){
-				echo "<div class='card text-white bg-info mb-3'><div class='card-header'>Enlightenment</div><div class='card-body'><p class='card-text'>";
+				echo "<div class='card text-white bg-info'><div class='card-header'>
+				<span class='badge badge-dark'>Year - {$s}</span> <span class='float-right'>Found Enlightenment</span></div><div class='card-body'><p class='card-text'>";
 				enlightenment();
 				echo "</p></div></div>";
 			}
